@@ -1,0 +1,97 @@
+{
+  "schemaVersion": "0.1",
+  "meta": {
+    "id": "example-detailed-zh",
+    "title": "详细示例",
+    "language": "zh",
+    "platform": ["web"],
+    "productType": "tool",
+    "updatedAt": "2026-01-01T00:00:00Z",
+    "source": "manual"
+  },
+  "problem": {
+    "background": "PRD 输出缺少稳定结构，影响编码上下文质量。",
+    "problemStatement": "导出格式不稳定导致实现成本增加。",
+    "targetUsers": ["个人产品经理"],
+    "constraints": []
+  },
+  "goals": {
+    "goals": [
+      { "goal": "减少导出时间", "metric": "导出耗时", "target": "-90%" },
+      { "goal": "提升一致性", "metric": "格式错误率", "target": "0%" }
+    ],
+    "nonGoals": []
+  },
+  "scope": {
+    "inScope": ["JSON 导出", "导出配置"],
+    "outScope": [],
+    "assumptions": [],
+    "openQuestions": []
+  },
+  "journeys": {
+    "primary": [
+      {
+        "stepTitle": "配置导出",
+        "userIntent": "选择配置",
+        "systemResponse": "展示预览"
+      },
+      {
+        "stepTitle": "执行导出",
+        "userIntent": "点击导出",
+        "systemResponse": "生成 JSON"
+      }
+    ],
+    "secondary": []
+  },
+  "requirements": [
+    {
+      "id": "FEATURE-P0",
+      "title": "导出 JSON 上下文",
+      "priority": "P0",
+      "userStory": "作为用户，我想生成结构化 JSON 以用于编码上下文。",
+      "acceptance": [
+        {
+          "given": "用户在导出页面",
+          "when": "点击导出",
+          "then": "生成 prd.context.json"
+        }
+      ],
+      "edgeCases": ["网络异常时提示并允许重试"],
+      "dependencies": ["用户已登录"],
+      "codingNotes": ["保持导出顺序稳定"]
+    }
+  ],
+  "tracking": {
+    "events": [
+      {
+        "eventName": "export_clicked",
+        "trigger": "用户点击导出",
+        "properties": [
+          { "name": "profile", "type": "string", "description": "导出配置" }
+        ]
+      }
+    ]
+  },
+  "nfr": {
+    "items": [
+      { "type": "performance", "requirement": "导出耗时小于 1 秒" },
+      { "type": "availability", "requirement": "可用性 99.9%" }
+    ]
+  },
+  "release": {
+    "plan": ["灰度 10%", "全量发布"],
+    "monitoring": ["导出失败率", "延迟"],
+    "rollback": ["恢复上一版本导出逻辑"]
+  },
+  "glossary": {
+    "terms": [
+      { "term": "PRD", "definition": "产品需求文档" }
+    ]
+  },
+  "changeLog": {
+    "summary": "初始化版本",
+    "changes": [
+      { "type": "added", "detail": "新增导出结构" }
+    ]
+  }
+}

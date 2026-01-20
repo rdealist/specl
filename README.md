@@ -18,6 +18,24 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
+## Docker
+
+Run the app and database with Docker Compose:
+
+```bash
+docker compose up --build
+```
+
+The app will be available at `http://localhost:3000` and Postgres at `localhost:5432`.
+
+## Environment Variables
+
+Copy `.env.example` to `.env` and set the required values:
+
+- `DATABASE_URL`
+- `AUTH_SECRET`
+- `ANTHROPIC_API_KEY` (only if AI mode is enabled)
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

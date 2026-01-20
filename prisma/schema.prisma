@@ -1,0 +1,187 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum LanguageMode {
+  zh
+  en
+  bilingual
+}
+
+enum DocumentStatus {
+  draft
+  ready_to_export
+  archived
+}
+
+enum ExportProfile {
+  lean
+  standard
+  detailed
+}
+
+enum ExportLanguage {
+  zh
+  en
+}
+
+enum ExportScope {
+  all
+  p0_only
+  p0_p1
+}
+
+enum AiProvider {
+  anthropic
+  openai
+  local
+}
+
+enum AiTaskType {
+  consistency_check
+  field_patch
+  suggested_flows
+  context_export_en
+  repair_json
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  workspaces   Workspace[]
+  documents    Document[]        @relation("DocumentCreatedBy")
+  versions     DocumentVersion[] @relation("DocumentVersionCreatedBy")
+  aiAuditLogs  AiAuditLog[]
+
+  @@index([createdAt])
+}
+
+model Workspace {
+  id          String   @id @default(cuid())
+  ownerUserId String
+  name        String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  owner       User      @relation(fields: [ownerUserId], references: [id], onDelete: Cascade)
+  documents   Document[]
+  templates   Template[]
+  aiAuditLogs AiAuditLog[]
+
+  @@index([ownerUserId])
+  @@index([updatedAt])
+}
+
+model Template {
+  id          String   @id @default(cuid())
+  workspaceId String?
+  name        String
+  version     String
+  schemaJson  Json     @db.JsonB
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workspace   Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  documents   Document[]
+
+  @@index([workspaceId])
+  @@index([name])
+}
+
+model Document {
+  id             String         @id @default(cuid())
+  workspaceId    String
+  templateId     String
+  title          String
+  languageMode   LanguageMode   @default(zh)
+  status         DocumentStatus @default(draft)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  createdByUserId String?
+  createdBy       User?     @relation("DocumentCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+
+  workspace      Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  template       Template  @relation(fields: [templateId], references: [id], onDelete: Restrict)
+
+  fields        DocumentField?
+  versions      DocumentVersion[]
+  exports       ExportRecord[]
+  aiAuditLogs   AiAuditLog[]
+
+  @@index([workspaceId, updatedAt])
+  @@index([templateId])
+  @@index([status])
+}
+
+model DocumentField {
+  documentId String   @id
+  fieldsJson Json     @db.JsonB
+  updatedAt  DateTime @updatedAt
+
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+}
+
+model DocumentVersion {
+  id                 String   @id @default(cuid())
+  documentId         String
+  versionNumber      Int
+  snapshotFieldsJson Json     @db.JsonB
+  changeSummary      String?
+  createdAt          DateTime @default(now())
+
+  createdByUserId    String?
+  createdBy          User?    @relation("DocumentVersionCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+
+  document           Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@unique([documentId, versionNumber])
+  @@index([documentId, createdAt])
+}
+
+model ExportRecord {
+  id          String        @id @default(cuid())
+  documentId  String
+  profile     ExportProfile
+  language    ExportLanguage
+  scope       ExportScope   @default(all)
+  contentJson Json          @db.JsonB
+  contentHash String
+  createdAt   DateTime      @default(now())
+
+  document    Document      @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@index([documentId, createdAt])
+  @@index([contentHash])
+}
+
+model AiAuditLog {
+  id           String     @id @default(cuid())
+  workspaceId  String
+  userId       String
+  documentId   String?
+  taskType     AiTaskType
+  provider     AiProvider
+  model        String
+  tokenIn      Int?
+  tokenOut     Int?
+  costEstimate Decimal?   @db.Decimal(10, 4)
+  createdAt    DateTime   @default(now())
+
+  workspace    Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  document     Document?  @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, createdAt])
+  @@index([userId, createdAt])
+  @@index([documentId, createdAt])
+}

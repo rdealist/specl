@@ -39,3 +39,16 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Local config
+.claude/
+.mcp.json
+.playwright-mcp/
+
+# Design files
+*.jpg
+*.png
+*.jpeg
+
+# Local notes
+ai-todo.md

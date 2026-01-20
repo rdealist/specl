@@ -1,0 +1,46 @@
+{
+  "schemaVersion": "0.1",
+  "meta": {
+    "id": "example-lean-zh",
+    "title": "精简示例",
+    "language": "zh",
+    "platform": ["web"],
+    "productType": "tool",
+    "updatedAt": "2026-01-01T00:00:00Z",
+    "source": "manual"
+  },
+  "problem": {
+    "background": "当前需求文档导出流程缺少统一结构。",
+    "problemStatement": "缺少稳定的结构化导出影响实现效率。",
+    "targetUsers": ["个人产品经理"],
+    "constraints": []
+  },
+  "goals": {
+    "goals": [
+      { "goal": "减少导出时间", "metric": "导出耗时", "target": "-90%" }
+    ],
+    "nonGoals": ["不做第三方集成"]
+  },
+  "scope": {
+    "inScope": ["JSON 导出", "导出配置"],
+    "outScope": ["PDF/Word 导出"],
+    "assumptions": [],
+    "openQuestions": []
+  },
+  "requirements": [
+    {
+      "id": "FEATURE-P0",
+      "title": "导出 JSON 上下文",
+      "priority": "P0",
+      "userStory": "作为用户，我想生成结构化 JSON 以用于编码上下文。",
+      "acceptance": [
+        {
+          "given": "用户在导出页面",
+          "when": "点击导出",
+          "then": "生成 prd.context.json"
+        }
+      ],
+      "edgeCases": ["网络异常时提示并允许重试"]
+    }
+  ]
+}

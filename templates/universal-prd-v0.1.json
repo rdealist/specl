@@ -1,0 +1,365 @@
+{
+  "templateSchemaVersion": "0.1",
+  "id": "tpl_universal_prd_v0_1",
+  "name": {
+    "zh": "通用 PRD（强结构）",
+    "en": "Universal PRD (Structured)"
+  },
+  "version": "0.1.0",
+  "i18n": {
+    "defaultLocale": "zh",
+    "supportedLocales": ["zh", "en"]
+  },
+  "contextSchemaVersion": "0.1",
+  "sections": [
+    {
+      "key": "meta",
+      "title": { "zh": "基本信息", "en": "Meta" },
+      "fields": [
+        {
+          "key": "title",
+          "type": "shortText",
+          "label": { "zh": "标题", "en": "Title" },
+          "required": true,
+          "validation": { "minLength": 1, "maxLength": 120 },
+          "ui": { "placeholder": { "zh": "一句话概括需求", "en": "One-line PRD title" } },
+          "export": { "path": "/meta/title" }
+        },
+        {
+          "key": "platform",
+          "type": "multiEnum",
+          "label": { "zh": "平台", "en": "Platform" },
+          "required": true,
+          "validation": {
+            "minItems": 1,
+            "items": ["web", "ios", "android", "miniprogram", "desktop", "backend"]
+          },
+          "export": { "path": "/meta/platform" }
+        },
+        {
+          "key": "productType",
+          "type": "enum",
+          "label": { "zh": "产品类型", "en": "Product type" },
+          "required": false,
+          "validation": {
+            "items": ["consumer", "business", "internal", "content", "ecommerce", "community", "tool", "other"]
+          },
+          "export": { "path": "/meta/productType" }
+        }
+      ]
+    },
+    {
+      "key": "problem",
+      "title": { "zh": "问题定义", "en": "Problem" },
+      "fields": [
+        {
+          "key": "background",
+          "type": "longText",
+          "label": { "zh": "背景", "en": "Background" },
+          "required": true,
+          "ui": {
+            "help": {
+              "zh": "描述现状与为什么要做，不要写解决方案。",
+              "en": "Describe context and why; avoid solutions."
+            }
+          },
+          "export": { "path": "/problem/background" }
+        },
+        {
+          "key": "problemStatement",
+          "type": "shortText",
+          "label": { "zh": "一句话问题陈述", "en": "Problem statement" },
+          "required": true,
+          "validation": { "minLength": 1, "maxLength": 200 },
+          "ui": {
+            "placeholder": {
+              "zh": "谁在什么场景遇到什么问题，导致什么影响",
+              "en": "Who has what problem in which context and impact"
+            }
+          },
+          "export": { "path": "/problem/problemStatement" }
+        },
+        {
+          "key": "targetUsers",
+          "type": "stringList",
+          "label": { "zh": "目标用户", "en": "Target users" },
+          "required": false,
+          "validation": { "maxItems": 8 },
+          "export": { "path": "/problem/targetUsers" }
+        },
+        {
+          "key": "constraints",
+          "type": "stringList",
+          "label": { "zh": "约束/限制", "en": "Constraints" },
+          "required": false,
+          "validation": { "maxItems": 10 },
+          "export": { "path": "/problem/constraints" }
+        }
+      ]
+    },
+    {
+      "key": "goals",
+      "title": { "zh": "目标与指标", "en": "Goals" },
+      "fields": [
+        {
+          "key": "goalsTable",
+          "type": "table",
+          "label": { "zh": "目标列表", "en": "Goals" },
+          "required": true,
+          "validation": { "minRows": 1, "maxRows": 8 },
+          "columns": [
+            { "key": "goal", "type": "shortText", "required": true },
+            { "key": "metric", "type": "shortText", "required": true },
+            { "key": "baseline", "type": "shortText", "required": false },
+            { "key": "target", "type": "shortText", "required": false },
+            { "key": "timeWindow", "type": "shortText", "required": false }
+          ],
+          "export": {
+            "path": "/goals/goals",
+            "transform": {
+              "type": "mapTableToArray",
+              "mapping": {
+                "goal": "goal",
+                "metric": "metric",
+                "baseline": "baseline",
+                "target": "target",
+                "timeWindow": "timeWindow"
+              }
+            }
+          }
+        },
+        {
+          "key": "nonGoals",
+          "type": "stringList",
+          "label": { "zh": "非目标（不做什么）", "en": "Non-goals" },
+          "required": true,
+          "validation": { "minItems": 1, "maxItems": 10 },
+          "export": { "path": "/goals/nonGoals" }
+        }
+      ]
+    },
+    {
+      "key": "scope",
+      "title": { "zh": "范围与未决问题", "en": "Scope" },
+      "fields": [
+        { "key": "inScope", "type": "stringList", "label": { "zh": "范围内", "en": "In scope" }, "required": true, "validation": { "minItems": 1, "maxItems": 20 }, "export": { "path": "/scope/inScope" } },
+        { "key": "outScope", "type": "stringList", "label": { "zh": "范围外", "en": "Out of scope" }, "required": true, "validation": { "minItems": 1, "maxItems": 20 }, "export": { "path": "/scope/outScope" } },
+        { "key": "assumptions", "type": "stringList", "label": { "zh": "假设", "en": "Assumptions" }, "required": false, "validation": { "maxItems": 10 }, "export": { "path": "/scope/assumptions" } },
+        { "key": "openQuestions", "type": "stringList", "label": { "zh": "未决问题", "en": "Open questions" }, "required": true, "validation": { "maxItems": 20 }, "ui": { "help": { "zh": "信息不足时必须写这里，禁止靠猜。", "en": "Put unknowns here; do not guess." } }, "export": { "path": "/scope/openQuestions" } }
+      ]
+    },
+    {
+      "key": "journeys",
+      "title": { "zh": "用户旅程（可选）", "en": "Journeys (Optional)" },
+      "fields": [
+        {
+          "key": "primaryJourney",
+          "type": "objectList",
+          "label": { "zh": "主旅程", "en": "Primary journey" },
+          "required": false,
+          "validation": { "maxItems": 10 },
+          "itemSchema": {
+            "type": "object",
+            "fields": [
+              { "key": "stepTitle", "type": "shortText", "required": true },
+              { "key": "userIntent", "type": "shortText", "required": true },
+              { "key": "systemResponse", "type": "shortText", "required": true }
+            ]
+          },
+          "export": { "path": "/journeys/primary" },
+          "exportProfile": { "standard": true, "detailed": true }
+        }
+      ]
+    },
+    {
+      "key": "requirements",
+      "title": { "zh": "需求列表（核心）", "en": "Requirements" },
+      "fields": [
+        {
+          "key": "requirements",
+          "type": "objectList",
+          "label": { "zh": "需求", "en": "Requirements" },
+          "required": true,
+          "validation": { "minItems": 1, "maxItems": 50 },
+          "itemSchema": {
+            "type": "object",
+            "fields": [
+              {
+                "key": "id",
+                "type": "shortText",
+                "required": true,
+                "validation": { "pattern": "^[A-Za-z][A-Za-z0-9_-]{1,63}$" },
+                "ui": { "placeholder": { "zh": "例如 FEATURE-P0", "en": "e.g. FEATURE-P0" } }
+              },
+              { "key": "title", "type": "shortText", "required": true },
+              { "key": "priority", "type": "enum", "required": true, "validation": { "items": ["P0", "P1", "P2"] } },
+              { "key": "userStory", "type": "longText", "required": true, "ui": { "placeholder": { "zh": "As a..., I want..., so that...", "en": "As a..., I want..., so that..." } } },
+              { "key": "description", "type": "longText", "required": false },
+              {
+                "key": "acceptance",
+                "type": "objectList",
+                "required": true,
+                "validation": { "minItems": 1, "maxItems": 6 },
+                "itemSchema": {
+                  "type": "object",
+                  "fields": [
+                    { "key": "given", "type": "shortText", "required": true },
+                    { "key": "when", "type": "shortText", "required": true },
+                    { "key": "then", "type": "shortText", "required": true }
+                  ]
+                },
+                "ai": { "enabled": true, "task": "field_patch" }
+              },
+              {
+                "key": "edgeCases",
+                "type": "stringList",
+                "required": true,
+                "validation": { "minItems": 1, "maxItems": 8 },
+                "ai": { "enabled": true, "task": "field_patch" }
+              },
+              {
+                "key": "flows",
+                "type": "object",
+                "required": false,
+                "fields": [
+                  {
+                    "key": "main",
+                    "type": "objectList",
+                    "required": false,
+                    "validation": { "maxItems": 7 },
+                    "itemSchema": {
+                      "type": "object",
+                      "fields": [
+                        { "key": "step", "type": "shortText", "required": true },
+                        { "key": "action", "type": "shortText", "required": true },
+                        { "key": "system", "type": "shortText", "required": true }
+                      ]
+                    },
+                    "ai": { "enabled": true, "task": "suggested_flows" }
+                  }
+                ]
+              },
+              { "key": "dependencies", "type": "stringList", "required": false, "validation": { "maxItems": 10 } },
+              { "key": "trackingRefs", "type": "stringList", "required": false, "validation": { "maxItems": 10 } },
+              { "key": "codingNotes", "type": "stringList", "required": false, "validation": { "maxItems": 10 } }
+            ]
+          },
+          "export": { "path": "/requirements" }
+        }
+      ]
+    },
+    {
+      "key": "tracking",
+      "title": { "zh": "埋点（可选）", "en": "Tracking (Optional)" },
+      "fields": [
+        {
+          "key": "events",
+          "type": "objectList",
+          "label": { "zh": "事件", "en": "Events" },
+          "required": false,
+          "validation": { "maxItems": 30 },
+          "itemSchema": {
+            "type": "object",
+            "fields": [
+              { "key": "eventName", "type": "shortText", "required": true },
+              { "key": "trigger", "type": "shortText", "required": true },
+              { "key": "metricMapping", "type": "shortText", "required": false }
+            ]
+          },
+          "export": { "path": "/tracking/events" },
+          "exportProfile": { "standard": true, "detailed": true }
+        }
+      ]
+    },
+    {
+      "key": "nfr",
+      "title": { "zh": "非功能要求（可选）", "en": "Non-functional Requirements (Optional)" },
+      "fields": [
+        {
+          "key": "items",
+          "type": "objectList",
+          "required": false,
+          "validation": { "maxItems": 20 },
+          "itemSchema": {
+            "type": "object",
+            "fields": [
+              { "key": "type", "type": "enum", "required": true, "validation": { "items": ["performance", "availability", "security", "privacy", "accessibility", "other"] } },
+              { "key": "requirement", "type": "shortText", "required": true }
+            ]
+          },
+          "export": { "path": "/nfr/items" },
+          "exportProfile": { "standard": true, "detailed": true }
+        }
+      ]
+    },
+    {
+      "key": "glossary",
+      "title": { "zh": "术语表（建议）", "en": "Glossary (Recommended)" },
+      "fields": [
+        {
+          "key": "terms",
+          "type": "objectList",
+          "required": false,
+          "validation": { "maxItems": 50 },
+          "itemSchema": {
+            "type": "object",
+            "fields": [
+              { "key": "term", "type": "shortText", "required": true },
+              { "key": "definition", "type": "shortText", "required": true }
+            ]
+          },
+          "export": { "path": "/glossary/terms" }
+        }
+      ]
+    }
+  ],
+  "readinessRules": {
+    "readyToExport": {
+      "requireFields": [
+        "meta.title",
+        "meta.platform",
+        "problem.background",
+        "problem.problemStatement",
+        "goals.goalsTable",
+        "goals.nonGoals",
+        "scope.inScope",
+        "scope.outScope",
+        "scope.openQuestions",
+        "requirements.requirements"
+      ],
+      "requirePerRequirement": [
+        "id",
+        "title",
+        "priority",
+        "userStory",
+        "acceptance",
+        "edgeCases"
+      ],
+      "notes": {
+        "zh": "满足以上条件即可导出 context；flows 可后补。",
+        "en": "Once met, context export is allowed; flows are optional."
+      }
+    }
+  },
+  "aiHooks": {
+    "consistencyCheck": {
+      "task": "consistency_check",
+      "enabled": true
+    },
+    "fillAcceptanceAndEdgeCases": {
+      "task": "field_patch",
+      "enabled": true,
+      "targets": [
+        "requirements.requirements[*].acceptance",
+        "requirements.requirements[*].edgeCases"
+      ]
+    },
+    "suggestedFlows": {
+      "task": "suggested_flows",
+      "enabled": true,
+      "targets": [
+        "requirements.requirements[*].flows.main"
+      ]
+    }
+  }
+}
