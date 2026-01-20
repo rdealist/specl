@@ -1,0 +1,72 @@
+import React from 'react';
+
+interface SpeclLogoProps {
+  size?: number;
+  className?: string;
+}
+
+export function SpeclLogo({ size = 512, className = '' }: SpeclLogoProps) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 512 512"
+      width={size}
+      height={size}
+      className={className}
+    >
+      {/* 深色圆角矩形背景 */}
+      <rect width="512" height="512" rx="100" ry="100" fill="#1a1a1a" />
+
+      {/* S 融合花括号设计 */}
+      <g
+        fill="none"
+        stroke="#ffffff"
+        strokeWidth="30"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        {/* 左上花括号尖 + S上半部 */}
+        <path d="M 140 120 L 110 160 L 140 200 L 200 200 Q 360 200, 360 256" />
+
+        {/* S下半部 + 右下花括号尖 */}
+        <path d="M 152 256 Q 152 312, 312 312 L 372 312 L 402 352 L 372 392" />
+      </g>
+
+      {/* 右下角蓝色圆点 */}
+      <circle cx="415" cy="430" r="22" fill="#3b82f6" />
+    </svg>
+  );
+}
+
+// 无背景版本，适合在已有背景上使用
+export function SpeclLogoIcon({ size = 32, className = '' }: SpeclLogoProps) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 512 512"
+      width={size}
+      height={size}
+      className={className}
+    >
+      {/* S 融合花括号设计 */}
+      <g
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="30"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        {/* 左上花括号尖 + S上半部 */}
+        <path d="M 140 120 L 110 160 L 140 200 L 200 200 Q 360 200, 360 256" />
+
+        {/* S下半部 + 右下花括号尖 */}
+        <path d="M 152 256 Q 152 312, 312 312 L 372 312 L 402 352 L 372 392" />
+      </g>
+
+      {/* 右下角蓝色圆点 */}
+      <circle cx="415" cy="430" r="22" fill="#3b82f6" />
+    </svg>
+  );
+}
+
+export default SpeclLogo;
