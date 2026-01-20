@@ -6,7 +6,7 @@
 
 import { useLocale } from '@/lib/i18n/context';
 import { LOCALE_NAMES } from '@/lib/i18n/config';
-import { SpeclSimpleIcon } from '@/components/icons/specl-icons';
+import { GlobeIcon } from '@/components/icons/specl-icons';
 import { useState } from 'react';
 
 export function LanguageSwitcher({ variant = 'header' }: { variant?: 'header' | 'footer' | 'compact' }) {
@@ -14,22 +14,21 @@ export function LanguageSwitcher({ variant = 'header' }: { variant?: 'header' | 
   const [isOpen, setIsOpen] = useState(false);
 
   const languages = [
-    { code: 'zh' as const, name: '简体中文', flag: '🇨🇳' },
-    { code: 'en' as const, name: 'English', flag: '🇺🇸' },
+    { code: 'zh' as const, name: '简体中文', icon: <span className="text-base">🇨🇳</span> },
+    { code: 'en' as const, name: 'English', icon: <span className="text-base">🇺🇸</span> },
   ];
 
   const currentLanguage = languages.find((lang) => lang.code === locale) || languages[0];
 
-  // 紧凑模式（用于移动端）
+  // 紧凑模式(用于移动端)
   if (variant === 'compact') {
     return (
       <button
         onClick={() => setLocale(locale === 'zh' ? 'en' : 'zh')}
-        className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg bg-[var(--secondary)] hover:bg-[var(--muted)] transition-colors text-sm"
+        className="flex items-center justify-center p-2 rounded-xl bg-[var(--secondary)] hover:bg-[var(--muted)] transition-all cursor-pointer"
         title={LOCALE_NAMES[locale === 'zh' ? 'en' : 'zh']}
       >
-        <span className="text-base">{locale === 'zh' ? '🇺🇸' : '🇨🇳'}</span>
-        <span className="hidden sm:inline">{locale === 'zh' ? 'EN' : '中文'}</span>
+        <GlobeIcon size={18} />
       </button>
     );
   }
@@ -39,9 +38,9 @@ export function LanguageSwitcher({ variant = 'header' }: { variant?: 'header' | 
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[var(--secondary)] hover:bg-[var(--muted)] transition-colors text-sm"
+        className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[var(--secondary)] hover:bg-[var(--muted)] transition-all text-sm cursor-pointer"
       >
-        <span className="text-base">{currentLanguage.flag}</span>
+        {currentLanguage.icon}
         <span className="hidden sm:inline">{currentLanguage.name}</span>
         <svg
           className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`}
@@ -59,7 +58,7 @@ export function LanguageSwitcher({ variant = 'header' }: { variant?: 'header' | 
             className="fixed inset-0 z-10"
             onClick={() => setIsOpen(false)}
           />
-          <div className="absolute right-0 mt-2 w-48 bg-[var(--card)] border border-[var(--border)] rounded-lg shadow-lg overflow-hidden z-20 animate-slide-down">
+          <div className="absolute right-0 mt-2 w-48 bg-[var(--card)] border border-[var(--border)] rounded-xl shadow-lg overflow-hidden z-20 animate-slide-down">
             {languages.map((language) => (
               <button
                 key={language.code}
@@ -67,13 +66,13 @@ export function LanguageSwitcher({ variant = 'header' }: { variant?: 'header' | 
                   setLocale(language.code);
                   setIsOpen(false);
                 }}
-                className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors ${
+                className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors cursor-pointer ${
                   locale === language.code
                     ? 'bg-[var(--accent)]/10 text-[var(--accent)]'
                     : 'hover:bg-[var(--secondary)]'
                 }`}
               >
-                <span className="text-base">{language.flag}</span>
+                {language.icon}
                 <span className="flex-1">{language.name}</span>
                 {locale === language.code && (
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
