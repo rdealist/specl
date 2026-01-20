@@ -1,5 +1,5 @@
-/* Import Google Fonts - Poppins (headings) + Open Sans (body) */
-@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap');
+/* Import Google Fonts - Space Grotesk (headings) + DM Sans (body) */
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
 @import "tailwindcss";
 
@@ -87,7 +87,7 @@ html {
 }
 
 body {
-  font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background: var(--background);
   color: var(--foreground);
   line-height: 1.6;
@@ -96,12 +96,12 @@ body {
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-/* Typography - Poppins for headings */
+/* Typography - Space Grotesk for headings */
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Space Grotesk', sans-serif;
   font-weight: 600;
-  letter-spacing: -0.02em;
-  line-height: 1.2;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
 }
 
 /* Focus styles - Enhanced accessibility */
@@ -197,7 +197,7 @@ h1, h2, h3, h4, h5, h6 {
 .stagger-4 { animation-delay: 0.2s; }
 .stagger-5 { animation-delay: 0.25s; }
 
-/* Button base */
+/* Button base - Enhanced with Aurora style */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -205,13 +205,13 @@ h1, h2, h3, h4, h5, h6 {
   gap: 0.5rem;
   padding: 0.625rem 1.25rem;
   font-size: 0.875rem;
-  font-weight: 500;
-  border-radius: 0.5rem;
-  transition: all 0.2s ease;
+  font-weight: 600;
+  border-radius: 0.625rem;
+  transition: all 0.25s ease;
   cursor: pointer;
   border: none;
   text-decoration: none;
-  font-family: 'Open Sans', sans-serif;
+  font-family: 'DM Sans', sans-serif;
 }
 
 .btn:disabled {
@@ -220,14 +220,33 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .btn-primary {
-  background: var(--primary);
+  background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
   color: var(--primary-foreground);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #60A5FA 0%, #3B82F6 100%);
+  opacity: 0;
+  transition: opacity 0.25s ease;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: var(--primary-hover);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.4);
+}
+
+.btn-primary:hover:not(:disabled)::before {
+  opacity: 1;
+}
+
+.btn-primary span {
+  position: relative;
+  z-index: 1;
 }
 
 .btn-secondary {
@@ -380,12 +399,58 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 600;
 }
 
-/* Gradient text - Updated for new colors */
+/* Gradient text - Aurora UI inspired */
 .gradient-text {
-  background: linear-gradient(135deg, var(--primary) 0%, #60A5FA 100%);
+  background: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 50%, #EC4899 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+/* Aurora gradient background effect */
+.aurora-gradient {
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.15) 0%,
+    rgba(139, 92, 246, 0.15) 25%,
+    rgba(236, 72, 153, 0.15) 50%,
+    rgba(248, 113, 113, 0.15) 75%,
+    rgba(59, 130, 246, 0.15) 100%
+  );
+  background-size: 400% 400%;
+  animation: aurora-shift 12s ease infinite;
+}
+
+@keyframes aurora-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* Aurora glow effect */
+.aurora-glow {
+  box-shadow:
+    0 0 40px rgba(59, 130, 246, 0.3),
+    0 0 80px rgba(139, 92, 246, 0.2),
+    0 0 120px rgba(236, 72, 153, 0.1);
+}
+
+/* Bento box grid pattern */
+.bento-grid {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+@media (min-width: 1024px) {
+  .bento-grid {
+    grid-template-columns: repeat(12, 1fr);
+    grid-template-rows: auto;
+  }
+
+  .bento-col-span-4 { grid-column: span 4; }
+  .bento-col-span-6 { grid-column: span 6; }
+  .bento-col-span-8 { grid-column: span 8; }
+  .bento-row-span-2 { grid-row: span 2; }
 }
 
 /* Glass effect - Optimized for both themes */
