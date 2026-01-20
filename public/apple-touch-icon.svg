@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180" width="180" height="180">
+  <defs>
+    <linearGradient id="bgGradient3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1a1a1a" />
+      <stop offset="100%" stop-color="#0d0d0f" />
+    </linearGradient>
+  </defs>
+
+  <!-- 背景圆角矩形 -->
+  <rect width="180" height="180" rx="40" ry="40" fill="url(#bgGradient3)" />
+
+  <!-- S 融合花括号设计 - 缩放适配 -->
+  <g fill="none" stroke="#ffffff" stroke-width="11" stroke-linecap="round" stroke-linejoin="round">
+    <!-- 左上花括号尖 + S上半部 -->
+    <path d="M 50 42 L 38 57 L 50 72 L 72 72 Q 128 72, 128 92" />
+    <!-- S下半部 + 右下花括号尖 -->
+    <path d="M 55 92 Q 55 112, 112 112 L 132 112 L 144 127 L 132 142" />
+  </g>
+
+  <!-- 右下角蓝色圆点 -->
+  <circle cx="148" cy="152" r="8" fill="#3b82f6" />
+</svg>

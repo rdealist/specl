@@ -2,6 +2,15 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import {
+  DocumentIcon,
+  PlusIcon,
+  SettingsIcon,
+  SpeclSimpleIcon,
+  UserIcon,
+} from "@/components/icons/specl-icons";
+import { useT, useFormat } from "@/lib/i18n/context";
+import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
 
 interface PRDItem {
   id: string;
@@ -36,28 +45,20 @@ const mockPRDs: PRDItem[] = [
 ];
 
 export default function DashboardPage() {
+  const t = useT();
+  const { formatRelativeTime } = useFormat();
   const [prds] = useState<PRDItem[]>(mockPRDs);
   const [showNewModal, setShowNewModal] = useState(false);
 
   const getStatusBadge = (status: PRDItem['status']) => {
     switch (status) {
       case 'ready_to_export':
-        return <span className="badge badge-success">Ready</span>;
+        return <span className="badge badge-success">{t('dashboard.ready')}</span>;
       case 'draft':
-        return <span className="badge badge-default">Draft</span>;
+        return <span className="badge badge-default">{t('dashboard.draft')}</span>;
       case 'archived':
-        return <span className="badge badge-default">Archived</span>;
+        return <span className="badge badge-default">{t('dashboard.archived')}</span>;
     }
-  };
-
-  const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('zh-CN', {
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
   };
 
   return (
@@ -68,21 +69,20 @@ export default function DashboardPage() {
           <div className="flex items-center gap-6">
             <Link href="/" className="flex items-center gap-2.5">
               <div className="w-8 h-8 bg-[var(--accent)] rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">S</span>
+                <SpeclSimpleIcon size={20} className="text-white" />
               </div>
-              <span className="font-semibold text-lg tracking-tight">Specl</span>
+              <span className="font-semibold text-lg tracking-tight">{t('common.appName')}</span>
             </Link>
+            <h1 className="hidden sm:block text-lg font-semibold">{t('dashboard.myPrds')}</h1>
           </div>
 
-          <div className="flex items-center gap-4">
-            <button className="btn btn-ghost text-sm">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
+          <div className="flex items-center gap-3">
+            <LanguageSwitcher variant="compact" />
+            <button className="btn btn-ghost text-sm p-2">
+              <SettingsIcon size={18} />
             </button>
             <div className="w-8 h-8 rounded-full bg-[var(--accent)] flex items-center justify-center text-white text-sm font-medium">
-              U
+              <UserIcon size={16} className="text-white" />
             </div>
           </div>
         </div>
@@ -93,19 +93,14 @@ export default function DashboardPage() {
         {/* Page Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-2xl font-bold mb-1">My PRDs</h1>
-            <p className="text-[var(--muted-foreground)]">
-              Create and manage your product requirement documents
-            </p>
+            <h2 className="text-xl font-semibold mb-1">{t('dashboard.myPrdsDesc')}</h2>
           </div>
           <button
             onClick={() => setShowNewModal(true)}
             className="btn btn-primary"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-            New PRD
+            <PlusIcon size={16} />
+            {t('dashboard.newPrd')}
           </button>
         </div>
 
@@ -113,19 +108,17 @@ export default function DashboardPage() {
         {prds.length === 0 ? (
           <div className="card text-center py-16">
             <div className="w-16 h-16 rounded-2xl bg-[var(--secondary)] flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-[var(--muted-foreground)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
+              <DocumentIcon size={32} className="text-[var(--muted-foreground)]" />
             </div>
-            <h3 className="text-lg font-semibold mb-2">No PRDs yet</h3>
+            <h3 className="text-lg font-semibold mb-2">{t('dashboard.noPrdsYet')}</h3>
             <p className="text-[var(--muted-foreground)] mb-6">
-              Create your first PRD to get started
+              {t('dashboard.noPrdsYetDesc')}
             </p>
             <button
               onClick={() => setShowNewModal(true)}
               className="btn btn-primary"
             >
-              Create PRD
+              {t('dashboard.createPrd')}
             </button>
           </div>
         ) : (
@@ -138,9 +131,7 @@ export default function DashboardPage() {
               >
                 <div className="flex items-start justify-between mb-4">
                   <div className="w-10 h-10 rounded-lg bg-[var(--accent)]/15 flex items-center justify-center group-hover:bg-[var(--accent)]/25 transition-colors">
-                    <svg className="w-5 h-5 text-[var(--accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
+                    <DocumentIcon size={20} className="text-[var(--accent)]" />
                   </div>
                   {getStatusBadge(prd.status)}
                 </div>
@@ -150,13 +141,13 @@ export default function DashboardPage() {
                 </h3>
 
                 <div className="flex items-center gap-4 text-sm text-[var(--muted-foreground)] mb-4">
-                  <span>{formatDate(prd.updatedAt)}</span>
+                  <span>{formatRelativeTime(prd.updatedAt)}</span>
                 </div>
 
                 {/* Progress bar */}
                 <div className="mt-auto">
                   <div className="flex items-center justify-between text-xs mb-1.5">
-                    <span className="text-[var(--muted-foreground)]">Completion</span>
+                    <span className="text-[var(--muted-foreground)]">{t('dashboard.completion')}</span>
                     <span className="font-medium">{prd.completionPercent}%</span>
                   </div>
                   <div className="h-1.5 bg-[var(--secondary)] rounded-full overflow-hidden">
@@ -177,11 +168,9 @@ export default function DashboardPage() {
               className="card border-dashed border-2 border-[var(--border)] flex flex-col items-center justify-center py-12 text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:border-[var(--accent)] hover:bg-[var(--accent)]/5 transition-all"
             >
               <div className="w-12 h-12 rounded-xl bg-[var(--secondary)] flex items-center justify-center mb-3">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
+                <PlusIcon size={24} />
               </div>
-              <span className="font-medium">New PRD</span>
+              <span className="font-medium">{t('dashboard.newPrd')}</span>
             </button>
           </div>
         )}
@@ -195,29 +184,29 @@ export default function DashboardPage() {
             onClick={() => setShowNewModal(false)}
           />
           <div className="relative bg-[var(--card)] rounded-xl shadow-2xl w-full max-w-md p-6 animate-scale-in border border-[var(--border)]">
-            <h2 className="text-xl font-bold mb-4">Create new PRD</h2>
+            <h2 className="text-xl font-bold mb-4">{t('dashboard.createPrd')}</h2>
 
             <form onSubmit={(e) => { e.preventDefault(); setShowNewModal(false); }}>
               <div className="mb-4">
                 <label htmlFor="title" className="block text-sm font-medium mb-2">
-                  Title
+                  {t('requirements.title')}
                 </label>
                 <input
                   id="title"
                   type="text"
                   className="input"
-                  placeholder="e.g., User Authentication System"
+                  placeholder={t('requirements.title')}
                   required
                 />
               </div>
 
               <div className="mb-6">
                 <label htmlFor="template" className="block text-sm font-medium mb-2">
-                  Template
+                  {t('template.selectTemplate')}
                 </label>
                 <select id="template" className="input">
-                  <option value="default">Default Template</option>
-                  <option value="minimal">Minimal Template</option>
+                  <option value="default">{t('template.defaultTemplate')}</option>
+                  <option value="minimal">{t('template.minimalTemplate')}</option>
                 </select>
               </div>
 
@@ -227,10 +216,10 @@ export default function DashboardPage() {
                   onClick={() => setShowNewModal(false)}
                   className="btn btn-secondary flex-1"
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </button>
                 <button type="submit" className="btn btn-primary flex-1">
-                  Create
+                  {t('common.confirm')}
                 </button>
               </div>
             </form>

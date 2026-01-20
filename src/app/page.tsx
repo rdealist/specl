@@ -1,6 +1,20 @@
+'use client';
+
 import Link from "next/link";
+import {
+  SpeclSimpleIcon,
+  ArrowRightIcon,
+  DocumentIcon,
+  CheckCircleIcon,
+  SparklesIcon,
+  GitHubIcon,
+} from "@/components/icons/specl-icons";
+import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
+import { useT } from "@/lib/i18n/context";
 
 export default function Home() {
+  const t = useT();
+
   return (
     <div className="min-h-screen flex flex-col bg-[var(--background)]">
       {/* Header */}
@@ -8,29 +22,30 @@ export default function Home() {
         <div className="container flex items-center justify-between h-16">
           <Link href="/" className="flex items-center gap-2.5">
             <div className="w-8 h-8 bg-[var(--accent)] rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">S</span>
+              <SpeclSimpleIcon size={20} className="text-white" />
             </div>
-            <span className="font-semibold text-lg tracking-tight">Specl</span>
+            <span className="font-semibold text-lg tracking-tight">{t('common.appName')}</span>
           </Link>
 
           <nav className="hidden md:flex items-center gap-8">
             <Link href="#features" className="text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors">
-              Features
+              {t('nav.features')}
             </Link>
             <Link href="#workflow" className="text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors">
-              Workflow
+              {t('nav.workflow')}
             </Link>
             <Link href="#docs" className="text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors">
-              Docs
+              {t('nav.docs')}
             </Link>
           </nav>
 
           <div className="flex items-center gap-3">
+            <LanguageSwitcher variant="compact" />
             <Link href="/login" className="btn btn-ghost text-sm">
-              Login
+              {t('auth.login')}
             </Link>
             <Link href="/register" className="btn btn-primary text-sm">
-              Get Started
+              {t('auth.signUp')}
             </Link>
           </div>
         </div>
@@ -48,28 +63,26 @@ export default function Home() {
             <div className="max-w-3xl mx-auto text-center">
               <div className="inline-flex items-center gap-2 px-3 py-1.5 mb-6 rounded-full bg-[var(--secondary)] text-sm text-[var(--muted-foreground)] animate-fade-in border border-[var(--border)]">
                 <span className="w-2 h-2 rounded-full bg-[var(--success)] animate-pulse"></span>
-                v0.1 Beta
+                {t('home.betaBadge')}
               </div>
 
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6 animate-slide-up">
-                Design. Structure.
+                {t('home.heroTitle')}
                 <br />
-                <span className="gradient-text">to Code.</span>
+                <span className="gradient-text">{t('home.heroTitleHighlight')}</span>
               </h1>
 
               <p className="text-lg md:text-xl text-[var(--muted-foreground)] mb-10 max-w-2xl mx-auto animate-slide-up stagger-1">
-                Specl helps you create structured, machine-readable PRD documents that coding agents can directly consume. Enforce product-thinking checkpoints with AI assistance.
+                {t('home.heroDescription')}
               </p>
 
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-slide-up stagger-2">
                 <Link href="/register" className="btn btn-primary px-8 py-3 text-base">
-                  Start Free
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                  </svg>
+                  {t('home.getStarted')}
+                  <ArrowRightIcon size={16} />
                 </Link>
                 <Link href="/prd/demo" className="btn btn-secondary px-8 py-3 text-base">
-                  View Demo
+                  {t('home.viewDemo')}
                 </Link>
               </div>
             </div>
@@ -81,47 +94,41 @@ export default function Home() {
           <div className="container">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                Built for Product Thinking
+                {t('home.builtForProductThinking')}
               </h2>
               <p className="text-[var(--muted-foreground)] max-w-2xl mx-auto">
-                Enforce completeness through structured fields and AI-powered assistance.
+                {t('home.builtForProductThinkingDesc')}
               </p>
             </div>
 
             <div className="grid md:grid-cols-3 gap-6">
               <div className="card card-interactive group">
                 <div className="w-12 h-12 rounded-xl bg-[var(--accent)]/15 flex items-center justify-center mb-4 group-hover:bg-[var(--accent)]/25 transition-colors">
-                  <svg className="w-6 h-6 text-[var(--accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
+                  <DocumentIcon size={24} className="text-[var(--accent)]" />
                 </div>
-                <h3 className="text-lg font-semibold mb-2">Structured Context</h3>
+                <h3 className="text-lg font-semibold mb-2">{t('features.structuredContext.title')}</h3>
                 <p className="text-sm text-[var(--muted-foreground)]">
-                  Export stable, JSON-schema validated documents that coding agents can directly consume without ambiguity.
+                  {t('features.structuredContext.description')}
                 </p>
               </div>
 
               <div className="card card-interactive group">
                 <div className="w-12 h-12 rounded-xl bg-[var(--success)]/15 flex items-center justify-center mb-4 group-hover:bg-[var(--success)]/25 transition-colors">
-                  <svg className="w-6 h-6 text-[var(--success)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
+                  <CheckCircleIcon size={24} className="text-[var(--success)]" />
                 </div>
-                <h3 className="text-lg font-semibold mb-2">Readiness Checks</h3>
+                <h3 className="text-lg font-semibold mb-2">{t('features.readinessChecks.title')}</h3>
                 <p className="text-sm text-[var(--muted-foreground)]">
-                  Built-in validation ensures all required fields are complete before export. No more missing acceptance criteria.
+                  {t('features.readinessChecks.description')}
                 </p>
               </div>
 
               <div className="card card-interactive group">
                 <div className="w-12 h-12 rounded-xl bg-[var(--warning)]/15 flex items-center justify-center mb-4 group-hover:bg-[var(--warning)]/25 transition-colors">
-                  <svg className="w-6 h-6 text-[var(--warning)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
+                  <SparklesIcon size={24} className="text-[var(--warning)]" />
                 </div>
-                <h3 className="text-lg font-semibold mb-2">AI Assistance</h3>
+                <h3 className="text-lg font-semibold mb-2">{t('features.aiAssistance.title')}</h3>
                 <p className="text-sm text-[var(--muted-foreground)]">
-                  Let AI help fill acceptance criteria, edge cases, and user flows based on your requirements context.
+                  {t('features.aiAssistance.description')}
                 </p>
               </div>
             </div>
@@ -133,10 +140,10 @@ export default function Home() {
           <div className="container">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                Simple Workflow
+                {t('home.simpleWorkflow')}
               </h2>
               <p className="text-[var(--muted-foreground)] max-w-2xl mx-auto">
-                From idea to structured PRD in minutes, not hours.
+                {t('home.simpleWorkflowDesc')}
               </p>
             </div>
 
@@ -146,9 +153,9 @@ export default function Home() {
                   <div className="w-12 h-12 rounded-full bg-[var(--accent)] text-white flex items-center justify-center mx-auto mb-4 font-bold">
                     1
                   </div>
-                  <h3 className="font-semibold mb-2">Write</h3>
+                  <h3 className="font-semibold mb-2">{t('workflow.write.title')}</h3>
                   <p className="text-sm text-[var(--muted-foreground)]">
-                    Fill in structured fields for problem, goals, scope, and requirements.
+                    {t('workflow.write.description')}
                   </p>
                 </div>
 
@@ -156,9 +163,9 @@ export default function Home() {
                   <div className="w-12 h-12 rounded-full bg-[var(--accent)] text-white flex items-center justify-center mx-auto mb-4 font-bold">
                     2
                   </div>
-                  <h3 className="font-semibold mb-2">Validate</h3>
+                  <h3 className="font-semibold mb-2">{t('workflow.validate.title')}</h3>
                   <p className="text-sm text-[var(--muted-foreground)]">
-                    Review blocking issues and let AI help complete missing fields.
+                    {t('workflow.validate.description')}
                   </p>
                 </div>
 
@@ -166,9 +173,9 @@ export default function Home() {
                   <div className="w-12 h-12 rounded-full bg-[var(--accent)] text-white flex items-center justify-center mx-auto mb-4 font-bold">
                     3
                   </div>
-                  <h3 className="font-semibold mb-2">Export</h3>
+                  <h3 className="font-semibold mb-2">{t('workflow.export.title')}</h3>
                   <p className="text-sm text-[var(--muted-foreground)]">
-                    Generate prd.context.json for your coding agent workflow.
+                    {t('workflow.export.description')}
                   </p>
                 </div>
               </div>
@@ -188,13 +195,13 @@ export default function Home() {
 
           <div className="container text-center relative">
             <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white">
-              Ready to structure your PRDs?
+              {t('home.readyToStructure')}
             </h2>
             <p className="text-white/70 mb-8 max-w-xl mx-auto">
-              Start creating machine-readable product specifications today.
+              {t('home.readyToStructureDesc')}
             </p>
             <Link href="/register" className="btn bg-white text-[var(--accent)] hover:bg-gray-100 px-8 py-3 text-base font-semibold">
-              Get Started Free
+              {t('home.getStartedFree')}
             </Link>
           </div>
         </section>
@@ -205,19 +212,21 @@ export default function Home() {
         <div className="container flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 bg-[var(--accent)] rounded-md flex items-center justify-center">
-              <span className="text-white font-bold text-xs">S</span>
+              <SpeclSimpleIcon size={16} className="text-white" />
             </div>
             <span className="text-sm text-[var(--muted-foreground)]">
-              Specl v0.1 - Open Source PRD Tool
+              {t('footer.copyright')}
             </span>
           </div>
-          <div className="flex items-center gap-6 text-sm text-[var(--muted-foreground)]">
-            <Link href="https://github.com" className="hover:text-[var(--foreground)] transition-colors">
-              GitHub
+          <div className="flex items-center gap-4 sm:gap-6 text-sm text-[var(--muted-foreground)]">
+            <Link href="https://github.com" className="hover:text-[var(--foreground)] transition-colors flex items-center gap-1.5">
+              <GitHubIcon size={16} />
+              {t('footer.github')}
             </Link>
             <Link href="/docs" className="hover:text-[var(--foreground)] transition-colors">
-              Documentation
+              {t('footer.documentation')}
             </Link>
+            <LanguageSwitcher variant="footer" />
           </div>
         </div>
       </footer>
