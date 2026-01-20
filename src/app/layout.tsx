@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { I18nClientProvider } from "@/components/providers/I18nClientProvider";
+import { ClientProviders } from "@/components/providers/ClientProviders";
 
 export const metadata: Metadata = {
   title: "Specl - Structured PRD Authoring Tool",
@@ -19,7 +19,7 @@ export default function RootLayout({
   return (
     <html lang="zh-CN" suppressHydrationWarning>
       <body className="min-h-screen antialiased">
-        <I18nClientProvider>{children}</I18nClientProvider>
+        <ClientProviders>{children}</ClientProviders>
       </body>
     </html>
   );

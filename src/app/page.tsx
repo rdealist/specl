@@ -10,6 +10,7 @@ import {
   GitHubIcon,
 } from "@/components/icons/specl-icons";
 import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
+import { ThemeSwitcher } from "@/components/theme";
 import { useT } from "@/lib/i18n/context";
 
 export default function Home() {
@@ -40,6 +41,7 @@ export default function Home() {
           </nav>
 
           <div className="flex items-center gap-3">
+            <ThemeSwitcher variant="compact" />
             <LanguageSwitcher variant="compact" />
             <Link href="/login" className="btn btn-ghost text-sm">
               {t('auth.login')}
@@ -226,6 +228,7 @@ export default function Home() {
             <Link href="/docs" className="hover:text-[var(--foreground)] transition-colors">
               {t('footer.documentation')}
             </Link>
+            <ThemeSwitcher variant="footer" />
             <LanguageSwitcher variant="footer" />
           </div>
         </div>

@@ -11,6 +11,7 @@ import {
 } from "@/components/icons/specl-icons";
 import { useT, useFormat } from "@/lib/i18n/context";
 import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
+import { ThemeSwitcher } from "@/components/theme";
 
 interface PRDItem {
   id: string;
@@ -77,6 +78,7 @@ export default function DashboardPage() {
           </div>
 
           <div className="flex items-center gap-3">
+            <ThemeSwitcher variant="compact" />
             <LanguageSwitcher variant="compact" />
             <button className="btn btn-ghost text-sm p-2">
               <SettingsIcon size={18} />

@@ -3,9 +3,12 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { SpeclSimpleIcon } from "@/components/icons/specl-icons";
+import { useT } from "@/lib/i18n/context";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const t = useT();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -18,13 +21,13 @@ export default function RegisterPage() {
     setError('');
 
     if (password !== confirmPassword) {
-      setError('Passwords do not match');
+      setError(t('auth.passwordsNotMatch'));
       setIsLoading(false);
       return;
     }
 
     if (password.length < 8) {
-      setError('Password must be at least 8 characters');
+      setError(t('auth.passwordTooShort'));
       setIsLoading(false);
       return;
     }
@@ -39,13 +42,13 @@ export default function RegisterPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || 'Registration failed');
+        setError(data.error || t('auth.registerFailed'));
         return;
       }
 
       router.push('/dashboard');
     } catch {
-      setError('Network error. Please try again.');
+      setError(t('auth.networkError'));
     } finally {
       setIsLoading(false);
     }
@@ -65,13 +68,13 @@ export default function RegisterPage() {
 
         <div className="max-w-md text-white relative">
           <div className="w-16 h-16 bg-white/15 rounded-2xl flex items-center justify-center mb-8">
-            <span className="text-3xl font-bold">S</span>
+            <SpeclSimpleIcon size={32} className="text-white" />
           </div>
           <h2 className="text-3xl font-bold mb-4">
-            Start building better PRDs
+            {t('home.heroTitle')} {t('home.heroTitleHighlight')}
           </h2>
           <p className="text-white/70 text-lg mb-8">
-            Join teams using Specl to create machine-readable product specifications.
+            {t('home.heroDescription')}
           </p>
 
           <div className="space-y-4">
@@ -81,7 +84,7 @@ export default function RegisterPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <span className="text-sm">Structured JSON export</span>
+              <span className="text-sm">{t('features.structuredContext.title')}</span>
             </div>
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center">
@@ -89,7 +92,7 @@ export default function RegisterPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <span className="text-sm">AI-assisted completion</span>
+              <span className="text-sm">{t('features.aiAssistance.title')}</span>
             </div>
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center">
@@ -97,7 +100,7 @@ export default function RegisterPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <span className="text-sm">Self-hostable & open source</span>
+              <span className="text-sm">{t('features.readinessChecks.title')}</span>
             </div>
           </div>
         </div>
@@ -110,13 +113,13 @@ export default function RegisterPage() {
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
-            Back to home
+            {t('auth.backToHome')}
           </Link>
 
           <div className="mb-8">
-            <h1 className="text-3xl font-bold mb-2">Create an account</h1>
+            <h1 className="text-3xl font-bold mb-2">{t('auth.createAccount')}</h1>
             <p className="text-[var(--muted-foreground)]">
-              Get started with Specl for free
+              {t('auth.createAccountDesc')}
             </p>
           </div>
 
@@ -129,7 +132,7 @@ export default function RegisterPage() {
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label htmlFor="email" className="block text-sm font-medium mb-2">
-                Email
+                {t('auth.email')}
               </label>
               <input
                 id="email"
@@ -145,7 +148,7 @@ export default function RegisterPage() {
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium mb-2">
-                Password
+                {t('auth.password')}
               </label>
               <input
                 id="password"
@@ -158,13 +161,13 @@ export default function RegisterPage() {
                 autoComplete="new-password"
               />
               <p className="mt-1.5 text-xs text-[var(--muted-foreground)]">
-                Must be at least 8 characters
+                {t('auth.passwordTooShort')}
               </p>
             </div>
 
             <div>
               <label htmlFor="confirmPassword" className="block text-sm font-medium mb-2">
-                Confirm Password
+                {t('auth.confirmPassword')}
               </label>
               <input
                 id="confirmPassword"
@@ -189,25 +192,25 @@ export default function RegisterPage() {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                  Creating account...
+                  {t('common.loading')}
                 </span>
               ) : (
-                'Create account'
+                t('auth.signUp')
               )}
             </button>
 
             <p className="text-xs text-center text-[var(--muted-foreground)]">
               By creating an account, you agree to our{' '}
-              <Link href="/terms" className="underline hover:text-[var(--foreground)]">Terms of Service</Link>
+              <Link href="/terms" className="underline hover:text-[var(--foreground)]">{t('footer.terms')}</Link>
               {' '}and{' '}
-              <Link href="/privacy" className="underline hover:text-[var(--foreground)]">Privacy Policy</Link>
+              <Link href="/privacy" className="underline hover:text-[var(--foreground)]">{t('footer.privacy')}</Link>
             </p>
           </form>
 
           <p className="mt-8 text-center text-sm text-[var(--muted-foreground)]">
-            Already have an account?{' '}
+            {t('auth.alreadyHaveAccount')}{' '}
             <Link href="/login" className="text-[var(--accent)] hover:underline font-medium">
-              Sign in
+              {t('auth.signIn')}
             </Link>
           </p>
         </div>
