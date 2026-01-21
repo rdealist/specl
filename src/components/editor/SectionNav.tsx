@@ -14,9 +14,17 @@ interface SectionNavProps {
   sections: Section[];
   documentId?: string;
   documentTitle?: string;
+  isSaving?: boolean;
+  lastSaved?: Date | null;
 }
 
-export const SectionNav: React.FC<SectionNavProps> = ({ sections, documentId, documentTitle = 'Untitled PRD' }) => {
+export const SectionNav: React.FC<SectionNavProps> = ({
+  sections,
+  documentId,
+  documentTitle = 'Untitled PRD',
+  isSaving = false,
+  lastSaved = null,
+}) => {
   return (
     <nav className="w-64 h-screen overflow-y-auto bg-[var(--card)] border-r border-[var(--border)] py-6 hidden lg:flex lg:flex-col sticky top-0">
       {/* Header */}
@@ -35,9 +43,19 @@ export const SectionNav: React.FC<SectionNavProps> = ({ sections, documentId, do
           <span className="font-semibold text-sm truncate">{documentTitle}</span>
         </div>
         {documentId && (
-          <span className="text-xs text-[var(--muted-foreground)] font-mono">
-            {documentId}
-          </span>
+          <span className="text-xs text-[var(--muted-foreground)] font-mono">{documentId}</span>
+        )}
+        {/* Save indicator */}
+        {isSaving && (
+          <div className="flex items-center gap-1.5 text-xs text-[var(--muted-foreground)] mt-2">
+            <div className="w-3 h-3 border-2 border-[var(--primary)] border-t-transparent rounded-full animate-spin" />
+            <span>Saving...</span>
+          </div>
+        )}
+        {!isSaving && lastSaved && (
+          <div className="text-xs text-[var(--muted-foreground)] mt-2">
+            Saved {new Date(lastSaved).toLocaleTimeString()}
+          </div>
         )}
       </div>
 

@@ -424,6 +424,62 @@ h1, h2, h3, h4, h5, h6 {
     0 0 90px rgba(255, 182, 193, 0.08);
 }
 
+/* Aurora gradient animation - Subtle and elegant */
+.aurora-gradient {
+  background: linear-gradient(
+    135deg,
+    rgba(135, 206, 235, 0.3) 0%,
+    rgba(144, 238, 144, 0.2) 25%,
+    rgba(255, 182, 193, 0.2) 50%,
+    rgba(139, 92, 246, 0.25) 75%,
+    rgba(135, 206, 235, 0.3) 100%
+  );
+  background-size: 400% 400%;
+  animation: aurora-flow 20s ease-in-out infinite;
+}
+
+@keyframes aurora-flow {
+  0%, 100% { background-position: 0% 50%; }
+  25% { background-position: 50% 25%; }
+  50% { background-position: 100% 50%; }
+  75% { background-position: 50% 75%; }
+}
+
+/* Aurora glow for CTAs */
+.aurora-glow {
+  position: relative;
+}
+
+.aurora-glow::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  box-shadow: 0 0 20px rgba(135, 206, 235, 0.4);
+}
+
+.aurora-glow:hover::before {
+  opacity: 1;
+}
+
+/* Reduced motion support - Critical for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .aurora-gradient {
+    animation: none;
+    background-position: 0% 50%;
+  }
+}
+
 /* Bento box grid pattern */
 .bento-grid {
   display: grid;

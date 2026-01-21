@@ -1,292 +1,257 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { EditorLayout } from '@/components/editor/EditorLayout';
 import { SectionNav } from '@/components/editor/SectionNav';
 import { IssuesPanel } from '@/components/editor/IssuesPanel';
-import { DocumentBlock } from '@/components/editor/DocumentBlock';
-import { RequirementCard } from '@/components/editor/RequirementCard';
+import { SectionRenderer } from '@/lib/template/sectionRenderer';
+import { useDocumentFields } from '@/hooks/useDocumentFields';
+import { useReadiness } from '@/hooks/useReadiness';
+import { useAiFieldPatch } from '@/hooks/useAiFieldPatch';
+import { useI18n } from '@/lib/i18n/context';
+import { applyPatch } from '@/lib/jsonPatch';
+import type { TemplateSchema } from '@/lib/template/types';
+import type { Issue } from '@/domain/readiness/types';
 
 interface EditorPageClientProps {
   id: string;
 }
 
 export default function EditorPageClient({ id }: EditorPageClientProps) {
-  const [expandedReq, setExpandedReq] = useState<string | null>(null);
+  const { language } = useI18n();
+  const { fieldsJson, updateSection, isSaving, lastSaved, error: fieldsError } = useDocumentFields(id);
+  const { readiness, loading: readinessLoading, error: readinessError, refresh: refreshReadiness } = useReadiness(id);
+  const { generatePatch, loading: aiLoading, error: aiError } = useAiFieldPatch();
 
-  const sections = [
-    { id: 'meta', title: 'Meta', active: true },
-    { id: 'problem', title: '1. Problem Statement' },
-    { id: 'goals', title: '2. Goals & Success' },
-    { id: 'scope', title: '3. Scope' },
-    { id: 'requirements', title: '4. Requirements', hasIssue: true },
-    { id: 'tracking', title: '5. Tracking' },
-    { id: 'nfr', title: '6. NFR' },
-    { id: 'glossary', title: '7. Glossary' },
-  ];
+  const [document, setDocument] = useState<any>(null);
+  const [template, setTemplate] = useState<TemplateSchema | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [aiToast, setAiToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
-  const requirements = [
-    {
-      id: 'AUTH-LOGIN',
-      title: 'User Login Flow',
-      priority: 'P0' as const,
-      userStory: 'As a user, I want to log in with my email and password so that I can access my account securely.',
-      acceptance: [
-        'User can enter email and password',
-        'System validates credentials against database',
-        'Successful login redirects to dashboard',
-        'Failed login shows error message',
-      ],
-      edgeCases: [
-        'User enters incorrect password 5 times',
-        'User tries to login with unverified email',
-        'Session expires during login process',
-      ],
-      flows: ['Main Login Flow', 'Password Reset Flow'],
-    },
-    {
-      id: 'AUTH-REGISTER',
-      title: 'User Registration',
-      priority: 'P0' as const,
-      userStory: 'As a new user, I want to create an account with my email so that I can start using the platform.',
-      acceptance: [
-        'User provides email and password',
-        'System validates email format',
-        'Password meets security requirements',
-        'Confirmation email is sent',
-      ],
-      edgeCases: [
-        'Email already registered',
-        'Weak password entered',
-        'Email delivery fails',
-      ],
-      flows: ['Registration Flow', 'Email Verification'],
-    },
-    {
-      id: 'PRD-EXPORT',
-      title: 'Export PRD to JSON',
-      priority: 'P1' as const,
-      userStory: 'As a product manager, I want to export my PRD as structured JSON so that coding agents can consume it.',
-      acceptance: [
-        'Export generates valid JSON schema',
-        'All required fields are included',
-        'Export supports multiple profiles (lean/standard/detailed)',
-      ],
-      edgeCases: [
-        'Required fields are missing',
-        'AI translation fails for EN export',
-      ],
-      flows: ['Export Flow'],
-    },
-  ];
+  // Load document and template
+  useEffect(() => {
+    const loadDocument = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const response = await fetch(`/api/documents/${id}`);
+        if (response.ok) {
+          const data = await response.json();
+          setDocument(data.document);
+          setTemplate(data.document.template.schemaJson as TemplateSchema);
+        } else {
+          const errorData = await response.json();
+          setError(errorData.error || 'Failed to load document');
+        }
+      } catch (err) {
+        console.error('Error loading document:', err);
+        setError('Network error while loading document');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadDocument();
+  }, [id]);
+
+  // Refresh readiness after save
+  useEffect(() => {
+    if (lastSaved && !isSaving) {
+      refreshReadiness();
+    }
+  }, [lastSaved, isSaving, refreshReadiness]);
+
+  // Auto-hide AI toast after 5 seconds
+  useEffect(() => {
+    if (aiToast) {
+      const timer = setTimeout(() => setAiToast(null), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [aiToast]);
+
+  // Handle AI auto-fix for issues
+  const handleAutoFix = async (issue: Issue) => {
+    if (!issue.fieldPath) {
+      setAiToast({ message: 'Cannot auto-fix: field path missing', type: 'error' });
+      return;
+    }
+
+    // Parse field path (e.g., "requirements.0.acceptance" -> section: "requirements", field updates)
+    const pathParts = issue.fieldPath.split('.');
+    const sectionKey = pathParts[0];
+
+    // Get current value from fieldsJson
+    let currentValue = fieldsJson;
+    for (const part of pathParts) {
+      currentValue = currentValue?.[part];
+    }
+
+    // Call AI to generate patch
+    const result = await generatePatch({
+      documentId: id,
+      targetFieldPath: issue.fieldPath,
+      currentValue,
+      documentSummary: {
+        title: document?.title || 'Untitled Document',
+      },
+    });
+
+    if (!result) {
+      // Error already set in hook
+      setAiToast({
+        message: aiError?.error || 'Failed to generate AI suggestion',
+        type: 'error',
+      });
+      return;
+    }
+
+    try {
+      // Apply patches to fieldsJson
+      const patchedFieldsJson = applyPatch(fieldsJson, result.patches);
+
+      // Update each affected section
+      // For simplicity, we'll update the entire section that contains the field
+      const sectionData = patchedFieldsJson[sectionKey];
+      await updateSection(sectionKey, sectionData);
+
+      setAiToast({
+        message: `AI suggestion applied successfully (${result.tokensUsed} tokens used)`,
+        type: 'success',
+      });
+
+      // Refresh readiness after applying patch
+      setTimeout(() => refreshReadiness(), 500);
+    } catch (patchError) {
+      console.error('Failed to apply AI patch:', patchError);
+      setAiToast({
+        message: 'Failed to apply AI suggestion',
+        type: 'error',
+      });
+    }
+  };
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[var(--background)] flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-[var(--primary)] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-[var(--muted-foreground)]">Loading document...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-[var(--background)] flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-500 mb-4">{error}</p>
+          <button onClick={() => window.location.reload()} className="btn btn-primary">
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!document || !template) {
+    return null;
+  }
+
+  // Build section nav items from template
+  const sections = template.sections.map((section, index) => ({
+    id: section.key,
+    title: section.title[language],
+    active: index === 0,
+  }));
 
   return (
     <EditorLayout
-      nav={<SectionNav sections={sections} documentId={id} documentTitle="New Feature Specification" />}
-      issues={<IssuesPanel />}
+      nav={
+        <SectionNav
+          sections={sections}
+          documentId={id}
+          documentTitle={document.title}
+          isSaving={isSaving}
+          lastSaved={lastSaved}
+        />
+      }
+      issues={<IssuesPanel readiness={readiness} loading={readinessLoading || aiLoading} onAutoFix={handleAutoFix} />}
     >
       <div className="pb-32 animate-fade-in">
-        {/* Meta Section */}
-        <section id="meta" className="mb-12 pb-8 border-b border-[var(--border)]">
+        {/* Save indicator */}
+        {fieldsError && (
+          <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+            {fieldsError}
+          </div>
+        )}
+
+        {/* Document header */}
+        <section className="mb-12 pb-8 border-b border-[var(--border)]">
           <div className="flex items-center gap-3 mb-4">
             <span className="badge badge-default font-mono">PRD-{id}</span>
-            <span className="badge badge-success">Draft</span>
+            <span className="badge badge-default">{document.status}</span>
+            {readiness && (
+              <span className="text-sm text-[var(--muted-foreground)]">
+                {readiness.completion.requiredPercent}% complete
+              </span>
+            )}
           </div>
-          <h1 className="text-4xl font-bold tracking-tight mb-4">
-            New Feature Specification
-          </h1>
+          <h1 className="text-4xl font-bold tracking-tight mb-4">{document.title}</h1>
           <div className="flex items-center gap-6 text-sm text-[var(--muted-foreground)]">
-            <span>Last updated: Today</span>
-            <span>Language: English</span>
+            {lastSaved && <span>Last saved: {new Date(lastSaved).toLocaleString()}</span>}
+            <span>Language: {language === 'zh' ? '中文' : 'English'}</span>
           </div>
         </section>
 
-        {/* Problem Statement */}
-        <section id="problem" className="mb-12">
-          <DocumentBlock type="h2" content="1. Problem Statement" />
-          <div className="card">
-            <div className="mb-4">
-              <h4 className="text-xs uppercase tracking-wide text-[var(--muted-foreground)] font-semibold mb-2">
-                Background
-              </h4>
-              <p className="text-sm text-[var(--foreground)]/80 leading-relaxed">
-                Current PRD authoring relies on unstructured documents that are difficult for coding agents to parse. Product managers spend significant time formatting and maintaining these documents.
-              </p>
-            </div>
-            <div>
-              <h4 className="text-xs uppercase tracking-wide text-[var(--muted-foreground)] font-semibold mb-2">
-                Problem Statement
-              </h4>
-              <p className="text-sm text-[var(--foreground)]/80 leading-relaxed">
-                Lack of stable, structured PRD export format slows implementation and increases miscommunication between product and engineering teams.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* Goals & Success */}
-        <section id="goals" className="mb-12">
-          <DocumentBlock type="h2" content="2. Goals & Success Metrics" />
-          <div className="grid gap-4">
-            <div className="card bg-[var(--success)]/5 border-[var(--success)]/20">
-              <h4 className="text-xs uppercase tracking-wide text-[var(--success)] font-bold mb-3">
-                Goals
-              </h4>
-              <ul className="space-y-3">
-                <li className="flex items-start gap-3">
-                  <span className="badge badge-success text-xs shrink-0">G1</span>
-                  <div>
-                    <p className="text-sm font-medium">Reduce PRD export time by 90%</p>
-                    <p className="text-xs text-[var(--muted-foreground)]">Metric: Export time • Target: &lt;30 seconds</p>
-                  </div>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="badge badge-success text-xs shrink-0">G2</span>
-                  <div>
-                    <p className="text-sm font-medium">Improve format consistency to 100%</p>
-                    <p className="text-xs text-[var(--muted-foreground)]">Metric: Schema validation pass rate • Target: 100%</p>
-                  </div>
-                </li>
-              </ul>
-            </div>
-            <div className="card">
-              <h4 className="text-xs uppercase tracking-wide text-[var(--muted-foreground)] font-semibold mb-3">
-                Non-Goals
-              </h4>
-              <ul className="space-y-2 text-sm text-[var(--foreground)]/80">
-                <li className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[var(--muted-foreground)]" />
-                  Third-party integrations (Jira, TAPD, Figma)
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[var(--muted-foreground)]" />
-                  PDF/Word export formats
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[var(--muted-foreground)]" />
-                  Team collaboration features
-                </li>
-              </ul>
-            </div>
-          </div>
-        </section>
-
-        {/* Scope */}
-        <section id="scope" className="mb-12">
-          <DocumentBlock type="h2" content="3. Scope" />
-          <div className="grid md:grid-cols-2 gap-4">
-            <div className="card border-[var(--success)]/30 bg-[var(--success)]/5">
-              <h4 className="text-xs uppercase tracking-wide text-[var(--success)] font-bold mb-3 flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-[var(--success)]" />
-                In Scope
-              </h4>
-              <ul className="space-y-2 text-sm">
-                <li>Structured JSON export with schema validation</li>
-                <li>Template-driven editor UI</li>
-                <li>AI-assisted field completion</li>
-                <li>Chinese and English export support</li>
-              </ul>
-            </div>
-            <div className="card border-[var(--destructive)]/30 bg-[var(--destructive)]/5">
-              <h4 className="text-xs uppercase tracking-wide text-[var(--destructive)] font-bold mb-3 flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-[var(--destructive)]" />
-                Out of Scope
-              </h4>
-              <ul className="space-y-2 text-sm">
-                <li>Real-time collaboration</li>
-                <li>Version control UI</li>
-                <li>Custom template builder</li>
-              </ul>
-            </div>
-          </div>
-        </section>
-
-        {/* Requirements */}
-        <section id="requirements" className="mb-12">
-          <div className="flex items-center justify-between mb-4">
-            <DocumentBlock type="h2" content="4. Requirements" />
-            <span className="badge badge-default">{requirements.length} items</span>
-          </div>
-          <div className="space-y-4">
-            {requirements.map((req) => (
-              <RequirementCard
-                key={req.id}
-                {...req}
-                isExpanded={expandedReq === req.id}
-                onToggle={() => setExpandedReq(expandedReq === req.id ? null : req.id)}
-              />
-            ))}
-          </div>
-        </section>
-
-        {/* Tracking */}
-        <section id="tracking" className="mb-12">
-          <DocumentBlock type="h2" content="5. Tracking Events" />
-          <div className="card overflow-hidden p-0">
-            <table className="w-full text-sm">
-              <thead className="bg-[var(--muted)] text-[var(--muted-foreground)]">
-                <tr>
-                  <th className="text-left px-4 py-3 font-medium">Event Name</th>
-                  <th className="text-left px-4 py-3 font-medium">Trigger</th>
-                  <th className="text-left px-4 py-3 font-medium">Properties</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[var(--border)]">
-                <tr>
-                  <td className="px-4 py-3 font-mono text-[var(--accent)]">prd_exported</td>
-                  <td className="px-4 py-3">User clicks export button</td>
-                  <td className="px-4 py-3 text-[var(--muted-foreground)]">profile, language, scope</td>
-                </tr>
-                <tr>
-                  <td className="px-4 py-3 font-mono text-[var(--accent)]">ai_fix_applied</td>
-                  <td className="px-4 py-3">User applies AI suggestion</td>
-                  <td className="px-4 py-3 text-[var(--muted-foreground)]">field_path, issue_code</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        {/* NFR */}
-        <section id="nfr" className="mb-12">
-          <DocumentBlock type="h2" content="6. Non-Functional Requirements" />
-          <div className="grid gap-4">
-            {[
-              { type: 'Performance', desc: 'Page load time under 2 seconds. Export generation under 5 seconds.' },
-              { type: 'Security', desc: 'All data encrypted in transit (TLS 1.3) and at rest. JWT-based authentication.' },
-              { type: 'Availability', desc: 'Target 99.9% uptime with graceful degradation during AI provider outages.' },
-            ].map((nfr) => (
-              <div key={nfr.type} className="card">
-                <h4 className="text-xs uppercase tracking-wide text-[var(--muted-foreground)] font-semibold mb-2">
-                  {nfr.type}
-                </h4>
-                <p className="text-sm">{nfr.desc}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* Glossary */}
-        <section id="glossary" className="mb-12">
-          <DocumentBlock type="h2" content="7. Glossary" />
-          <div className="card">
-            <dl className="grid sm:grid-cols-2 gap-6">
-              <div>
-                <dt className="font-semibold text-sm mb-1">PRD</dt>
-                <dd className="text-sm text-[var(--muted-foreground)]">Product Requirements Document</dd>
-              </div>
-              <div>
-                <dt className="font-semibold text-sm mb-1">Context</dt>
-                <dd className="text-sm text-[var(--muted-foreground)]">Structured JSON output for coding agents</dd>
-              </div>
-              <div>
-                <dt className="font-semibold text-sm mb-1">Readiness</dt>
-                <dd className="text-sm text-[var(--muted-foreground)]">Validation state indicating export eligibility</dd>
-              </div>
-            </dl>
-          </div>
-        </section>
+        {/* Render sections dynamically from template */}
+        {template.sections.map((sectionSchema) => (
+          <section key={sectionSchema.key} id={sectionSchema.key} className="mb-12">
+            <SectionRenderer
+              sectionSchema={sectionSchema}
+              sectionData={fieldsJson[sectionSchema.key] || {}}
+              onChange={(updates) => updateSection(sectionSchema.key, updates)}
+              language={language}
+              disabled={isSaving}
+              showValidation={true}
+              collapsible={true}
+            />
+          </section>
+        ))}
       </div>
+
+      {/* AI Toast Notification */}
+      {aiToast && (
+        <div className="fixed bottom-4 right-4 z-50 animate-slide-up">
+          <div
+            className={`px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 ${
+              aiToast.type === 'success'
+                ? 'bg-green-500 text-white'
+                : 'bg-red-500 text-white'
+            }`}
+          >
+            {aiToast.type === 'success' ? (
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            ) : (
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            )}
+            <span className="text-sm">{aiToast.message}</span>
+          </div>
+        </div>
+      )}
     </EditorLayout>
   );
 }

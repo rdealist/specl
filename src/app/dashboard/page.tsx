@@ -1,7 +1,8 @@
 'use client';
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   DocumentIcon,
   PlusIcon,
@@ -22,37 +23,103 @@ interface PRDItem {
   status: 'draft' | 'ready_to_export' | 'archived';
   updatedAt: string;
   completionPercent: number;
+  templateName?: string;
 }
-
-const mockPRDs: PRDItem[] = [
-  {
-    id: 'prd-001',
-    title: 'User Authentication System',
-    status: 'ready_to_export',
-    updatedAt: '2025-01-20T10:30:00Z',
-    completionPercent: 100,
-  },
-  {
-    id: 'prd-002',
-    title: 'Payment Integration',
-    status: 'draft',
-    updatedAt: '2025-01-19T15:45:00Z',
-    completionPercent: 65,
-  },
-  {
-    id: 'prd-003',
-    title: 'Dashboard Analytics',
-    status: 'draft',
-    updatedAt: '2025-01-18T09:20:00Z',
-    completionPercent: 30,
-  },
-];
 
 export default function DashboardPage() {
   const t = useT();
   const { formatRelativeTime } = useFormat();
-  const [prds] = useState<PRDItem[]>(mockPRDs);
+  const { user } = useAuth();
+  const [prds, setPrds] = useState<PRDItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [showNewModal, setShowNewModal] = useState(false);
+  const [newPrdTitle, setNewPrdTitle] = useState('');
+  const [templates, setTemplates] = useState<any[]>([]);
+  const [selectedTemplateId, setSelectedTemplateId] = useState('');
+  const [isCreating, setIsCreating] = useState(false);
+
+  // Fetch templates
+  useEffect(() => {
+    const fetchTemplates = async () => {
+      try {
+        // For now, we'll use a hardcoded template list
+        // In a real implementation, this would fetch from /api/templates
+        setTemplates([
+          { id: 'default', name: 'Standard PRD v0.1' }
+        ]);
+        setSelectedTemplateId('default');
+      } catch (err) {
+        console.error('Error fetching templates:', err);
+      }
+    };
+
+    fetchTemplates();
+  }, []);
+
+  // Fetch documents
+  useEffect(() => {
+    const fetchDocuments = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const response = await fetch('/api/documents');
+        if (response.ok) {
+          const data = await response.json();
+          setPrds(data.documents);
+        } else {
+          const errorData = await response.json();
+          setError(errorData.error || 'Failed to load documents');
+        }
+      } catch (err) {
+        console.error('Error fetching documents:', err);
+        setError('Network error while loading documents');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (user) {
+      fetchDocuments();
+    }
+  }, [user]);
+
+  // Create new PRD
+  const handleCreatePRD = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsCreating(true);
+
+    try {
+      const response = await fetch('/api/documents', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: newPrdTitle,
+          templateId: selectedTemplateId,
+          languageMode: 'zh',
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setPrds([data.document, ...prds]);
+        setShowNewModal(false);
+        setNewPrdTitle('');
+
+        // Navigate to the new document
+        window.location.href = `/prd/${data.document.id}`;
+      } else {
+        const errorData = await response.json();
+        alert(errorData.error || 'Failed to create document');
+      }
+    } catch (err) {
+      console.error('Error creating document:', err);
+      alert('Network error while creating document');
+    } finally {
+      setIsCreating(false);
+    }
+  };
 
   const getStatusBadge = (status: PRDItem['status']) => {
     switch (status) {
@@ -71,6 +138,32 @@ export default function DashboardPage() {
     if (percent >= 40) return 'bg-[var(--warning)]';
     return 'bg-[var(--primary)]';
   };
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[var(--background)] flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-[var(--primary)] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-[var(--muted-foreground)]">Loading your PRDs...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-[var(--background)] flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-500 mb-4">{error}</p>
+          <button onClick={() => window.location.reload()} className="btn btn-primary">
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[var(--background)]">
@@ -265,7 +358,7 @@ export default function DashboardPage() {
               </button>
             </div>
 
-            <form onSubmit={(e) => { e.preventDefault(); setShowNewModal(false); }} className="space-y-6">
+            <form onSubmit={handleCreatePRD} className="space-y-6">
               <div>
                 <label htmlFor="title" className="block text-sm font-semibold mb-3">
                   {t('requirements.title')}
@@ -275,7 +368,10 @@ export default function DashboardPage() {
                   type="text"
                   className="input focus:ring-2 focus:ring-[var(--primary)]/20"
                   placeholder={t('requirements.title')}
+                  value={newPrdTitle}
+                  onChange={(e) => setNewPrdTitle(e.target.value)}
                   required
+                  disabled={isCreating}
                 />
               </div>
 
@@ -283,9 +379,18 @@ export default function DashboardPage() {
                 <label htmlFor="template" className="block text-sm font-semibold mb-3">
                   {t('template.selectTemplate')}
                 </label>
-                <select id="template" className="input focus:ring-2 focus:ring-[var(--primary)]/20">
-                  <option value="default">{t('template.defaultTemplate')}</option>
-                  <option value="minimal">{t('template.minimalTemplate')}</option>
+                <select
+                  id="template"
+                  className="input focus:ring-2 focus:ring-[var(--primary)]/20"
+                  value={selectedTemplateId}
+                  onChange={(e) => setSelectedTemplateId(e.target.value)}
+                  disabled={isCreating}
+                >
+                  {templates.map((template) => (
+                    <option key={template.id} value={template.id}>
+                      {template.name}
+                    </option>
+                  ))}
                 </select>
               </div>
 
@@ -294,11 +399,16 @@ export default function DashboardPage() {
                   type="button"
                   onClick={() => setShowNewModal(false)}
                   className="btn btn-secondary flex-1"
+                  disabled={isCreating}
                 >
                   {t('common.cancel')}
                 </button>
-                <button type="submit" className="btn btn-primary flex-1">
-                  <span>{t('common.confirm')}</span>
+                <button
+                  type="submit"
+                  className="btn btn-primary flex-1"
+                  disabled={isCreating}
+                >
+                  <span>{isCreating ? 'Creating...' : t('common.confirm')}</span>
                 </button>
               </div>
             </form>
