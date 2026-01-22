@@ -8,7 +8,7 @@ export interface SectionRendererProps {
   sectionSchema: SectionSchema;
   sectionData: SectionData;
   onChange: (updates: SectionData) => void;
-  language: 'zh' | 'en';
+  locale: 'zh' | 'en';
   disabled?: boolean;
   showValidation?: boolean;
   collapsible?: boolean;
@@ -27,7 +27,7 @@ export function SectionRenderer({
   sectionSchema,
   sectionData,
   onChange,
-  language,
+  locale,
   disabled = false,
   showValidation = true,
   collapsible = true,
@@ -53,9 +53,9 @@ export function SectionRenderer({
         onClick={isCollapsible ? () => setIsCollapsed(!isCollapsed) : undefined}
       >
         <div>
-          <h3 className="text-xl font-bold mb-1">{sectionSchema.title[language]}</h3>
+          <h3 className="text-xl font-bold mb-1">{sectionSchema.title[locale]}</h3>
           {sectionSchema.description && (
-            <p className="text-sm text-[var(--muted-foreground)]">{sectionSchema.description[language]}</p>
+            <p className="text-sm text-[var(--muted-foreground)]">{sectionSchema.description[locale]}</p>
           )}
           {sectionSchema.optional && (
             <span className="text-xs text-[var(--muted-foreground)] mt-1 inline-block">Optional section</span>
@@ -82,7 +82,7 @@ export function SectionRenderer({
               fieldSchema={fieldSchema}
               value={sectionData[fieldSchema.key] ?? null}
               onChange={(value) => handleFieldChange(fieldSchema.key, value)}
-              language={language}
+              locale={locale}
               disabled={disabled}
               showValidation={showValidation}
             />

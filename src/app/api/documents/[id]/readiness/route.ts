@@ -46,7 +46,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     }
 
     // Parse template schema
-    const templateSchema = document.template.schemaJson as TemplateSchema;
+    const templateSchema = document.template.schemaJson as unknown as TemplateSchema;
     const fieldsJson = document.fields.fieldsJson as Record<string, any>;
 
     // Evaluate readiness

@@ -18,7 +18,7 @@ interface EditorPageClientProps {
 }
 
 export default function EditorPageClient({ id }: EditorPageClientProps) {
-  const { language } = useI18n();
+  const { locale } = useI18n();
   const { fieldsJson, updateSection, isSaving, lastSaved, error: fieldsError } = useDocumentFields(id);
   const { readiness, loading: readinessLoading, error: readinessError, refresh: refreshReadiness } = useReadiness(id);
   const { generatePatch, loading: aiLoading, error: aiError } = useAiFieldPatch();
@@ -165,7 +165,7 @@ export default function EditorPageClient({ id }: EditorPageClientProps) {
   // Build section nav items from template
   const sections = template.sections.map((section, index) => ({
     id: section.key,
-    title: section.title[language],
+    title: section.title[locale],
     active: index === 0,
   }));
 
@@ -204,7 +204,7 @@ export default function EditorPageClient({ id }: EditorPageClientProps) {
           <h1 className="text-4xl font-bold tracking-tight mb-4">{document.title}</h1>
           <div className="flex items-center gap-6 text-sm text-[var(--muted-foreground)]">
             {lastSaved && <span>Last saved: {new Date(lastSaved).toLocaleString()}</span>}
-            <span>Language: {language === 'zh' ? '中文' : 'English'}</span>
+            <span>Language: {locale === 'zh' ? '中文' : 'English'}</span>
           </div>
         </section>
 
@@ -215,7 +215,7 @@ export default function EditorPageClient({ id }: EditorPageClientProps) {
               sectionSchema={sectionSchema}
               sectionData={fieldsJson[sectionSchema.key] || {}}
               onChange={(updates) => updateSection(sectionSchema.key, updates)}
-              language={language}
+              locale={locale}
               disabled={isSaving}
               showValidation={true}
               collapsible={true}

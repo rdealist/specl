@@ -5,7 +5,7 @@ export interface FieldRendererProps {
   value: FieldValue;
   onChange: (value: FieldValue) => void;
   fieldSchema: FieldSchema;
-  language: 'zh' | 'en';
+  locale: 'zh' | 'en';
   disabled?: boolean;
   error?: string;
 }
@@ -56,8 +56,8 @@ export function validateField(value: FieldValue, schema: FieldSchema): Validatio
 /**
  * Short text input field
  */
-export function ShortTextRenderer({ value, onChange, fieldSchema, language, disabled, error }: FieldRendererProps) {
-  const placeholder = fieldSchema.placeholder?.[language] || '';
+export function ShortTextRenderer({ value, onChange, fieldSchema, locale, disabled, error }: FieldRendererProps) {
+  const placeholder = fieldSchema.placeholder?.[locale] || '';
 
   return (
     <div>
@@ -78,8 +78,8 @@ export function ShortTextRenderer({ value, onChange, fieldSchema, language, disa
 /**
  * Long text textarea field
  */
-export function LongTextRenderer({ value, onChange, fieldSchema, language, disabled, error }: FieldRendererProps) {
-  const placeholder = fieldSchema.placeholder?.[language] || '';
+export function LongTextRenderer({ value, onChange, fieldSchema, locale, disabled, error }: FieldRendererProps) {
+  const placeholder = fieldSchema.placeholder?.[locale] || '';
 
   return (
     <div>
@@ -100,7 +100,7 @@ export function LongTextRenderer({ value, onChange, fieldSchema, language, disab
 /**
  * Enum dropdown field
  */
-export function EnumRenderer({ value, onChange, fieldSchema, language, disabled, error }: FieldRendererProps) {
+export function EnumRenderer({ value, onChange, fieldSchema, locale, disabled, error }: FieldRendererProps) {
   return (
     <div>
       <select
@@ -112,7 +112,7 @@ export function EnumRenderer({ value, onChange, fieldSchema, language, disabled,
         <option value="">Select...</option>
         {fieldSchema.options?.map((option) => (
           <option key={option.value} value={option.value}>
-            {option.label[language]}
+            {option.label[locale]}
           </option>
         ))}
       </select>
@@ -124,7 +124,7 @@ export function EnumRenderer({ value, onChange, fieldSchema, language, disabled,
 /**
  * Multi-enum checkbox group field
  */
-export function MultiEnumRenderer({ value, onChange, fieldSchema, language, disabled, error }: FieldRendererProps) {
+export function MultiEnumRenderer({ value, onChange, fieldSchema, locale, disabled, error }: FieldRendererProps) {
   const selectedValues = (value as string[]) || [];
 
   const handleToggle = (optionValue: string) => {
@@ -146,7 +146,7 @@ export function MultiEnumRenderer({ value, onChange, fieldSchema, language, disa
               disabled={disabled}
               className="w-4 h-4"
             />
-            <span className="text-sm">{option.label[language]}</span>
+            <span className="text-sm">{option.label[locale]}</span>
           </label>
         ))}
       </div>
@@ -158,7 +158,7 @@ export function MultiEnumRenderer({ value, onChange, fieldSchema, language, disa
 /**
  * String list editor (array of strings)
  */
-export function StringListRenderer({ value, onChange, fieldSchema, language, disabled, error }: FieldRendererProps) {
+export function StringListRenderer({ value, onChange, fieldSchema, locale, disabled, error }: FieldRendererProps) {
   const items = (value as string[]) || [];
   const [newItem, setNewItem] = React.useState('');
 
@@ -214,7 +214,7 @@ export function StringListRenderer({ value, onChange, fieldSchema, language, dis
           value={newItem}
           onChange={(e) => setNewItem(e.target.value)}
           onKeyPress={handleKeyPress}
-          placeholder={fieldSchema.placeholder?.[language] || 'Add item...'}
+          placeholder={fieldSchema.placeholder?.[locale] || 'Add item...'}
           disabled={disabled}
         />
         <button type="button" onClick={handleAdd} className="btn btn-secondary" disabled={disabled || !newItem.trim()}>
@@ -229,7 +229,7 @@ export function StringListRenderer({ value, onChange, fieldSchema, language, dis
 /**
  * Object list editor (array of objects)
  */
-export function ObjectListRenderer({ value, onChange, fieldSchema, language, disabled, error }: FieldRendererProps) {
+export function ObjectListRenderer({ value, onChange, fieldSchema, locale, disabled, error }: FieldRendererProps) {
   const items = (value as Array<Record<string, any>>) || [];
 
   const handleAdd = () => {
@@ -305,7 +305,7 @@ export function NumberRenderer({ value, onChange, fieldSchema, disabled, error }
 /**
  * Boolean checkbox field
  */
-export function BooleanRenderer({ value, onChange, fieldSchema, language, disabled }: FieldRendererProps) {
+export function BooleanRenderer({ value, onChange, fieldSchema, locale, disabled }: FieldRendererProps) {
   return (
     <label className="flex items-center gap-2 cursor-pointer">
       <input
@@ -315,7 +315,7 @@ export function BooleanRenderer({ value, onChange, fieldSchema, language, disabl
         disabled={disabled}
         className="w-4 h-4"
       />
-      <span className="text-sm">{fieldSchema.label[language]}</span>
+      <span className="text-sm">{fieldSchema.label[locale]}</span>
     </label>
   );
 }

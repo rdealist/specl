@@ -59,7 +59,7 @@ export const IssuesPanel: React.FC<IssuesPanelProps> = ({ readiness, loading = f
               ) : (
                 <div className="space-y-2">
                   {blockingIssues.map((issue, index) => (
-                    <IssueCard key={`blocking-${index}`} issue={issue} onAutoFix={onAutoFix} />
+                    <IssueCard key={`blocking-${index}`} issue={issue} onAutoFix={onAutoFix} isBlocking={true} />
                   ))}
                 </div>
               )}
@@ -120,8 +120,7 @@ export const IssuesPanel: React.FC<IssuesPanelProps> = ({ readiness, loading = f
   );
 };
 
-const IssueCard: React.FC<{ issue: Issue; onAutoFix?: (issue: Issue) => void }> = ({ issue, onAutoFix }) => {
-  const isBlocking = issue.type === 'blocking';
+const IssueCard: React.FC<{ issue: Issue; onAutoFix?: (issue: Issue) => void; isBlocking?: boolean }> = ({ issue, onAutoFix, isBlocking = false }) => {
 
   return (
     <div

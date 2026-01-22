@@ -4,7 +4,7 @@ import React from 'react';
 
 interface WarningItem {
   id: string;
-  type: 'fallback' | 'question' | 'info';
+  type: 'fallback' | 'question' | 'info' | 'error';
   message: string;
 }
 
@@ -19,6 +19,13 @@ export const ExportWarnings: React.FC<ExportWarningsProps> = ({ items }) => {
 
   const getWarningStyle = (type: WarningItem['type']) => {
     switch (type) {
+      case 'error':
+        return {
+          bg: 'bg-[var(--destructive)]/10',
+          border: 'border-[var(--destructive)]/30',
+          icon: 'text-[var(--destructive)]',
+          label: 'Error',
+        };
       case 'fallback':
         return {
           bg: 'bg-[var(--warning)]/10',
@@ -65,7 +72,11 @@ export const ExportWarnings: React.FC<ExportWarningsProps> = ({ items }) => {
               className={`p-4 rounded-lg border ${style.bg} ${style.border} animate-slide-up`}
             >
               <div className="flex items-center gap-2 mb-2">
-                {item.type === 'fallback' ? (
+                {item.type === 'error' ? (
+                  <svg className={`w-4 h-4 ${style.icon}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                ) : item.type === 'fallback' ? (
                   <svg className={`w-4 h-4 ${style.icon}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>

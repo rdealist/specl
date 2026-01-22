@@ -1,4 +1,5 @@
-import { Issue } from "../issues/types";
+import type { Issue } from "../issues/types";
+export type { Issue } from "../issues/types";
 
 export interface CompletionStats {
   requiredDone: number;

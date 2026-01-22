@@ -8,7 +8,7 @@ export interface DynamicFieldProps {
   fieldSchema: FieldSchema;
   value: FieldValue;
   onChange: (value: FieldValue) => void;
-  language: 'zh' | 'en';
+  locale: 'zh' | 'en';
   disabled?: boolean;
   showValidation?: boolean;
 }
@@ -27,7 +27,7 @@ export function DynamicField({
   fieldSchema,
   value,
   onChange,
-  language,
+  locale,
   disabled = false,
   showValidation = true,
 }: DynamicFieldProps) {
@@ -53,14 +53,14 @@ export function DynamicField({
       {/* Field Label */}
       {fieldSchema.type !== 'boolean' && (
         <label className="block text-sm font-medium">
-          {fieldSchema.label[language]}
+          {fieldSchema.label[locale]}
           {fieldSchema.required && <span className="text-red-500 ml-1">*</span>}
         </label>
       )}
 
       {/* Field Description */}
       {fieldSchema.description && (
-        <p className="text-xs text-[var(--muted-foreground)] mb-2">{fieldSchema.description[language]}</p>
+        <p className="text-xs text-[var(--muted-foreground)] mb-2">{fieldSchema.description[locale]}</p>
       )}
 
       {/* Field Renderer */}
@@ -68,7 +68,7 @@ export function DynamicField({
         value,
         onChange: handleChange,
         fieldSchema,
-        language,
+        locale,
         disabled,
         error,
       })}

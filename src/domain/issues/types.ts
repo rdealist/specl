@@ -18,6 +18,7 @@ export interface Issue {
   fieldPath: string;
   message: string;
   suggestion?: string;
+  canAutoFix?: boolean;
   meta?: Record<string, unknown>;
 }
 
